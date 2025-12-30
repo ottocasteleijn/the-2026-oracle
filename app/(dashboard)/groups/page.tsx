@@ -33,8 +33,18 @@ async function getUserGroups(): Promise<(Group & { member_count: number })[]> {
         .select("*", { count: "exact", head: true })
         .eq("group_id", group.id);
 
+      // Explicitly construct object to avoid spread type error
+      const g = group as Group;
       return {
-        ...group,
+        id: g.id,
+        name: g.name,
+        description: g.description,
+        invite_code: g.invite_code,
+        created_by: g.created_by,
+        max_members: g.max_members,
+        is_active: g.is_active,
+        created_at: g.created_at,
+        updated_at: g.updated_at,
         member_count: count ?? 0,
       };
     })
