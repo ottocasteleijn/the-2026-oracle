@@ -1,45 +1,33 @@
 /**
  * Database types for The 2026 Oracle
- * These types mirror the Supabase schema
+ * Re-exports generated types from Supabase and adds custom types
  */
 
-export type MemberRole = "admin" | "member";
-export type PredictionStatus = "pending" | "correct" | "incorrect" | "cancelled";
-export type VoteType = "agreed" | "doubt";
+// Re-export all generated types
+export type { Database, Tables, TablesInsert, TablesUpdate, Enums } from "./supabase";
+export { Constants } from "./supabase";
 
-export interface Profile {
-  id: string;
-  display_name: string;
-  avatar_url: string | null;
-  bio: string | null;
-  total_potential_winnings: number;
-  predictions_count: number;
-  correct_predictions: number;
-  created_at: string;
-  updated_at: string;
-}
+// Import Database type for use in this file
+import type { Database } from "./supabase";
 
-export interface Group {
-  id: string;
-  name: string;
-  description: string | null;
-  invite_code: string;
-  created_by: string;
-  max_members: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// Type aliases for common table types
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Group = Database["public"]["Tables"]["groups"]["Row"];
+export type GroupMember = Database["public"]["Tables"]["group_members"]["Row"];
+export type Prediction = Database["public"]["Tables"]["predictions"]["Row"];
+export type Vote = Database["public"]["Tables"]["votes"]["Row"];
+export type Settlement = Database["public"]["Tables"]["settlements"]["Row"];
 
-export interface GroupMember {
-  id: string;
-  group_id: string;
-  user_id: string;
-  role: MemberRole;
-  joined_at: string;
-}
+// Enum type aliases
+export type MemberRole = Database["public"]["Enums"]["member_role"];
+export type PredictionStatus = Database["public"]["Enums"]["prediction_status"];
+export type VoteType = Database["public"]["Enums"]["vote_type"];
 
-export interface Prediction {
+// View types
+export type PredictionWithVotes = Database["public"]["Views"]["prediction_with_votes"]["Row"];
+
+// Extended types with joins (for UI display)
+export interface PredictionWithDetails {
   id: string;
   user_id: string;
   group_id: string;
@@ -48,40 +36,16 @@ export interface Prediction {
   boldness_score: number;
   payout_odds: number;
   ai_comment: string;
-  stake_amount: number;
-  potential_payout: number;
+  stake_amount: number | null;
+  potential_payout: number | null;
   status: PredictionStatus;
   created_at: string;
   updated_at: string;
-}
-
-export interface Vote {
-  id: string;
-  prediction_id: string;
-  user_id: string;
-  vote: VoteType;
-  created_at: string;
-}
-
-export interface Settlement {
-  id: string;
-  prediction_id: string;
-  outcome: boolean;
-  evidence_url: string | null;
-  evidence_description: string | null;
-  settled_by: string;
-  disputed: boolean;
-  settled_at: string;
-}
-
-// Extended types with joins
-
-export interface PredictionWithDetails extends Prediction {
-  author_name: string;
+  author_name: string | null;
   author_avatar: string | null;
-  group_name: string;
-  agreed_count: number;
-  doubt_count: number;
+  group_name: string | null;
+  agreed_count: number | null;
+  doubt_count: number | null;
 }
 
 export interface GroupWithMembers extends Group {
@@ -94,7 +58,6 @@ export interface GroupMemberWithProfile extends GroupMember {
 }
 
 // API Response types
-
 export interface JudgeResponse {
   concreteness_score: number;
   boldness_score: number;
@@ -115,7 +78,6 @@ export interface LeaderboardEntry {
 }
 
 // Form types
-
 export interface CreatePredictionInput {
   content: string;
   group_id: string;
@@ -143,61 +105,3 @@ export interface SettlePredictionInput {
   evidence_url?: string;
   evidence_description?: string;
 }
-
-// Supabase generated types helper
-export interface Database {
-  public: {
-    Tables: {
-      profiles: {
-        Row: Profile;
-        Insert: Omit<Profile, "created_at" | "updated_at" | "total_potential_winnings" | "predictions_count" | "correct_predictions">;
-        Update: Partial<Omit<Profile, "id" | "created_at">>;
-      };
-      groups: {
-        Row: Group;
-        Insert: Omit<Group, "id" | "invite_code" | "created_at" | "updated_at" | "is_active">;
-        Update: Partial<Omit<Group, "id" | "invite_code" | "created_by" | "created_at">>;
-      };
-      group_members: {
-        Row: GroupMember;
-        Insert: Omit<GroupMember, "id" | "joined_at">;
-        Update: Partial<Omit<GroupMember, "id" | "group_id" | "user_id" | "joined_at">>;
-      };
-      predictions: {
-        Row: Prediction;
-        Insert: Omit<Prediction, "id" | "potential_payout" | "status" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Prediction, "id" | "user_id" | "potential_payout" | "created_at">>;
-      };
-      votes: {
-        Row: Vote;
-        Insert: Omit<Vote, "id" | "created_at">;
-        Update: Partial<Omit<Vote, "id" | "prediction_id" | "user_id" | "created_at">>;
-      };
-      settlements: {
-        Row: Settlement;
-        Insert: Omit<Settlement, "id" | "disputed" | "settled_at">;
-        Update: Partial<Omit<Settlement, "id" | "prediction_id" | "settled_by" | "settled_at">>;
-      };
-    };
-    Views: {
-      prediction_with_votes: {
-        Row: PredictionWithDetails;
-      };
-    };
-    Functions: {
-      join_group_by_code: {
-        Args: { p_invite_code: string };
-        Returns: string;
-      };
-      get_leaderboard: {
-        Args: { p_limit?: number };
-        Returns: LeaderboardEntry[];
-      };
-      regenerate_invite_code: {
-        Args: { p_group_id: string };
-        Returns: string;
-      };
-    };
-  };
-}
-

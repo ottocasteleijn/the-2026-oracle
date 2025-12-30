@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 /**
  * Create a Supabase client for server-side usage (Server Components, Route Handlers)
