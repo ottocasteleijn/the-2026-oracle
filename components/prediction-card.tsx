@@ -19,11 +19,11 @@ import {
 
 interface PredictionCardProps {
   prediction: PredictionWithDetails;
-  currentUserId?: string;
-  userVote?: VoteType;
-  onVote?: (predictionId: string, vote: VoteType) => void;
-  className?: string;
-  index?: number;
+  currentUserId?: string | undefined;
+  userVote?: VoteType | undefined;
+  onVote?: ((predictionId: string, vote: VoteType) => void) | undefined;
+  className?: string | undefined;
+  index?: number | undefined;
 }
 
 const statusConfig = {
