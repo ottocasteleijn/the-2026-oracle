@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { Group, Profile, PredictionWithDetails } from "@/types/database";
+import type { Group, PredictionWithDetails } from "@/types/database";
 import { Users, Copy, ArrowLeft, Settings, Crown } from "lucide-react";
 
 interface GroupPageProps {
