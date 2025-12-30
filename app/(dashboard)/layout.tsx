@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Eye, Users, Trophy, Menu, LogOut } from "lucide-react";
+import { Eye, Users, Trophy, LogOut } from "lucide-react";
 
 async function UserNav() {
   const supabase = await createClient();

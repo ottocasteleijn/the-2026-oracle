@@ -2,7 +2,6 @@ import { streamObject } from "ai";
 import { z } from "zod";
 import { getModel, type AIProvider } from "@/lib/ai/providers";
 import { JUDGE_SYSTEM_PROMPT, createUserPrompt } from "@/lib/ai/judge-prompt";
-import { calculatePayoutOdds } from "@/lib/utils";
 
 /**
  * Zod schema for the AI Judge response

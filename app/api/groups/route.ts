@@ -8,10 +8,6 @@ const createGroupSchema = z.object({
   max_members: z.number().int().min(2).max(100).optional().default(50),
 });
 
-const joinGroupSchema = z.object({
-  invite_code: z.string().length(12),
-});
-
 /**
  * POST /api/groups
  * Create a new group

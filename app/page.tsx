@@ -1,22 +1,7 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Eye, Sparkles, ArrowRight, Zap, Target, Trophy } from "lucide-react";
-
-async function getStats() {
-  const supabase = await createClient();
-  
-  const [profilesResult, predictionsResult] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("predictions").select("*", { count: "exact", head: true }),
-  ]);
-
-  return {
-    prophets: profilesResult.count ?? 0,
-    predictions: predictionsResult.count ?? 0,
-  };
-}
 
 export default async function HomePage() {
   const supabase = await createClient();

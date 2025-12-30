@@ -26,7 +26,7 @@ const judgeSchema = z.object({
 });
 
 interface PredictionInputProps {
-  groupId?: string;
+  groupId?: string; // Reserved for future use
   onSubmit?: (prediction: {
     content: string;
     concreteness_score: number;
@@ -38,7 +38,7 @@ interface PredictionInputProps {
 }
 
 export function PredictionInput({
-  groupId,
+  groupId: _groupId,
   onSubmit,
   className,
 }: PredictionInputProps) {
@@ -48,30 +48,36 @@ export function PredictionInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Streaming AI analysis
-  const { object, submit, isLoading, error, stop } = useObject({
+  const { object, submit, isLoading } = useObject({
     api: "/api/judge",
     schema: judgeSchema,
   });
 
   // Debounced analysis trigger
   const debouncedAnalyze = useCallback(
-    debounce((text: string) => {
+    (text: string) => {
       if (text.length >= 20) {
         submit({ prediction: text });
         setShowAnalysis(true);
       }
-    }, 800),
+    },
     [submit]
+  );
+
+  // Create debounced version
+  const debouncedSubmit = useCallback(
+    debounce(debouncedAnalyze, 800),
+    [debouncedAnalyze]
   );
 
   // Trigger analysis as user types
   useEffect(() => {
     if (prediction.length >= 20) {
-      debouncedAnalyze(prediction);
+      debouncedSubmit(prediction);
     } else {
       setShowAnalysis(false);
     }
-  }, [prediction, debouncedAnalyze]);
+  }, [prediction, debouncedSubmit]);
 
   // Calculate derived values
   const concreteness = object?.concreteness_score ?? 0;
