@@ -6,6 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import type { Group } from "@/types/database";
 import { Users, Plus, ArrowRight, Copy } from "lucide-react";
 
+// Interface for the Supabase query result
+interface GroupQueryResult {
+  id: string;
+  name: string;
+  description: string | null;
+  invite_code: string;
+  created_by: string;
+  max_members: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  group_members: { user_id: string }[];
+}
+
 async function getUserGroups(): Promise<(Group & { member_count: number })[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -25,26 +39,25 @@ async function getUserGroups(): Promise<(Group & { member_count: number })[]> {
     return [];
   }
 
-  // Get member counts
+  // Get member counts - cast data to typed array
+  const typedData = (data ?? []) as GroupQueryResult[];
   const groupsWithCounts = await Promise.all(
-    (data ?? []).map(async (group) => {
+    typedData.map(async (group) => {
       const { count } = await supabase
         .from("group_members")
         .select("*", { count: "exact", head: true })
         .eq("group_id", group.id);
 
-      // Explicitly construct object to avoid spread type error
-      const g = group as Group;
       return {
-        id: g.id,
-        name: g.name,
-        description: g.description,
-        invite_code: g.invite_code,
-        created_by: g.created_by,
-        max_members: g.max_members,
-        is_active: g.is_active,
-        created_at: g.created_at,
-        updated_at: g.updated_at,
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        invite_code: group.invite_code,
+        created_by: group.created_by,
+        max_members: group.max_members,
+        is_active: group.is_active,
+        created_at: group.created_at,
+        updated_at: group.updated_at,
         member_count: count ?? 0,
       };
     })
