@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Eye, Users, Trophy, LogOut } from "lucide-react";
+import type { ProfileQueryResult } from "@/types/supabase-queries";
 
 async function UserNav() {
   const supabase = await createClient();
@@ -25,11 +26,13 @@ async function UserNav() {
   }
 
   // Get profile data
-  const { data: profile } = await supabase
+  const { data } = await supabase
     .from("profiles")
     .select("display_name, avatar_url")
     .eq("id", user.id)
     .single();
+  
+  const profile = data as ProfileQueryResult | null;
 
   return (
     <div className="flex items-center gap-3">

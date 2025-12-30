@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { Group, PredictionWithDetails } from "@/types/database";
+import type { MemberQueryResult } from "@/types/supabase-queries";
 import { Users, Copy, ArrowLeft, Settings, Crown } from "lucide-react";
 
 interface GroupPageProps {
@@ -54,15 +55,6 @@ async function getGroup(id: string): Promise<(Group & { userRole: string }) | nu
     updated_at: groupData.updated_at,
     userRole: memberRole,
   };
-}
-
-interface MemberQueryResult {
-  role: string;
-  profiles: {
-    id: string;
-    display_name: string;
-    avatar_url: string | null;
-  } | null;
 }
 
 async function getGroupMembers(groupId: string) {

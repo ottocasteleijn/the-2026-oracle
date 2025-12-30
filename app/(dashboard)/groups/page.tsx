@@ -4,21 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Group } from "@/types/database";
+import type { GroupQueryResult } from "@/types/supabase-queries";
 import { Users, Plus, ArrowRight, Copy } from "lucide-react";
-
-// Interface for the Supabase query result
-interface GroupQueryResult {
-  id: string;
-  name: string;
-  description: string | null;
-  invite_code: string;
-  created_by: string;
-  max_members: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-  group_members: { user_id: string }[];
-}
 
 async function getUserGroups(): Promise<(Group & { member_count: number })[]> {
   const supabase = await createClient();
