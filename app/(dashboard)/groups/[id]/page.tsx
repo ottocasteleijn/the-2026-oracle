@@ -41,6 +41,7 @@ async function getGroup(id: string): Promise<(Group & { userRole: string }) | nu
 
   // Explicitly construct the return object to satisfy TypeScript
   const groupData = group as Group;
+  const memberRole = (membership as { role: string }).role;
   return {
     id: groupData.id,
     name: groupData.name,
@@ -51,7 +52,7 @@ async function getGroup(id: string): Promise<(Group & { userRole: string }) | nu
     is_active: groupData.is_active,
     created_at: groupData.created_at,
     updated_at: groupData.updated_at,
-    userRole: membership.role,
+    userRole: memberRole,
   };
 }
 
@@ -70,10 +71,22 @@ async function getGroupMembers(groupId: string) {
     `)
     .eq("group_id", groupId);
 
-  return (data ?? []).map((m) => ({
-    ...(m.profiles as unknown as Profile),
-    role: m.role,
-  }));
+  return (data ?? []).map((m) => {
+    const profile = m.profiles as unknown as Profile;
+    const memberData = m as { role: string; profiles: unknown };
+    return {
+      id: profile.id,
+      display_name: profile.display_name,
+      avatar_url: profile.avatar_url,
+      bio: profile.bio,
+      total_potential_winnings: profile.total_potential_winnings,
+      predictions_count: profile.predictions_count,
+      correct_predictions: profile.correct_predictions,
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+      role: memberData.role,
+    };
+  });
 }
 
 async function getGroupPredictions(groupId: string): Promise<PredictionWithDetails[]> {

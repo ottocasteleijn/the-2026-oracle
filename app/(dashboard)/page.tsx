@@ -33,10 +33,18 @@ async function getLeaderboard(): Promise<LeaderboardEntry[]> {
     return [];
   }
 
-  return (data ?? []).map((entry: Omit<LeaderboardEntry, 'rank'>, index: number) => ({
-    ...entry,
-    rank: index + 1,
-  }));
+  return (data ?? []).map((entry, index: number) => {
+    const e = entry as Omit<LeaderboardEntry, 'rank'>;
+    return {
+      user_id: e.user_id,
+      display_name: e.display_name,
+      avatar_url: e.avatar_url,
+      total_potential_winnings: e.total_potential_winnings,
+      predictions_count: e.predictions_count,
+      correct_predictions: e.correct_predictions,
+      rank: index + 1,
+    };
+  });
 }
 
 async function getCurrentUser() {
