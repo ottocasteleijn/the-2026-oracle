@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Card } from "@/components/ui/card";
 import { Eye, Mail, Lock, Loader2, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
 
@@ -36,8 +35,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.push(redirect as "/" | `/${string}`);
-      router.refresh();
+      // Dynamic redirect - bypass typed routes for user-provided paths
+      window.location.href = redirect;
     } catch {
       setError("An unexpected error occurred");
     } finally {

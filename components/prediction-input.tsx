@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ScoreGauge, PayoutOddsDisplay } from "@/components/score-gauge";
 import { Badge } from "@/components/ui/badge";
-import { cn, calculatePayoutOdds, debounce } from "@/lib/utils";
+import { cn, calculatePayoutOdds } from "@/lib/utils";
 import {
   Sparkles,
   AlertTriangle,
@@ -53,31 +53,45 @@ export function PredictionInput({
     schema: judgeSchema,
   });
 
-  // Debounced analysis trigger
-  const debouncedAnalyze = useCallback(
+  // Ref to track timeout for debouncing
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced analysis trigger using ref-based approach
+  const triggerAnalysis = useCallback(
     (text: string) => {
-      if (text.length >= 20) {
-        submit({ prediction: text });
-        setShowAnalysis(true);
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
+      
+      // Set new debounced call
+      debounceTimeoutRef.current = setTimeout(() => {
+        if (text.length >= 20) {
+          submit({ prediction: text });
+          setShowAnalysis(true);
+        }
+      }, 800);
     },
     [submit]
-  );
-
-  // Create debounced version
-  const debouncedSubmit = useCallback(
-    debounce(debouncedAnalyze, 800),
-    [debouncedAnalyze]
   );
 
   // Trigger analysis as user types
   useEffect(() => {
     if (prediction.length >= 20) {
-      debouncedSubmit(prediction);
+      triggerAnalysis(prediction);
     } else {
       setShowAnalysis(false);
     }
-  }, [prediction, debouncedSubmit]);
+  }, [prediction, triggerAnalysis]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate derived values
   const concreteness = object?.concreteness_score ?? 0;
