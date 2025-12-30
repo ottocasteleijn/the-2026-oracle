@@ -26,25 +26,27 @@ async function getPredictions(): Promise<PredictionWithDetails[]> {
 async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   const supabase = await createClient();
   
-  const { data, error } = await supabase.rpc("get_leaderboard", { p_limit: 10 });
+  // Use direct table query instead of RPC for proper type inference
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url, total_potential_winnings, predictions_count, correct_predictions")
+    .order("total_potential_winnings", { ascending: false })
+    .limit(10);
 
   if (error) {
     console.error("Error fetching leaderboard:", error);
     return [];
   }
 
-  return (data ?? []).map((entry, index: number) => {
-    const e = entry as Omit<LeaderboardEntry, 'rank'>;
-    return {
-      user_id: e.user_id,
-      display_name: e.display_name,
-      avatar_url: e.avatar_url,
-      total_potential_winnings: e.total_potential_winnings,
-      predictions_count: e.predictions_count,
-      correct_predictions: e.correct_predictions,
-      rank: index + 1,
-    };
-  });
+  return (data ?? []).map((profile, index) => ({
+    user_id: profile.id,
+    display_name: profile.display_name,
+    avatar_url: profile.avatar_url,
+    total_potential_winnings: profile.total_potential_winnings ?? 0,
+    predictions_count: profile.predictions_count ?? 0,
+    correct_predictions: profile.correct_predictions ?? 0,
+    rank: index + 1,
+  }));
 }
 
 async function getCurrentUser() {
