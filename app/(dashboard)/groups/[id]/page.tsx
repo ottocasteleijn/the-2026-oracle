@@ -14,7 +14,7 @@ interface GroupPageProps {
   params: Promise<{ id: string }>;
 }
 
-async function getGroup(id: string) {
+async function getGroup(id: string): Promise<(Group & { userRole: string }) | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -39,7 +39,20 @@ async function getGroup(id: string) {
 
   if (!membership) return null;
 
-  return { ...group, userRole: membership.role } as Group & { userRole: string };
+  // Explicitly construct the return object to satisfy TypeScript
+  const groupData = group as Group;
+  return {
+    id: groupData.id,
+    name: groupData.name,
+    description: groupData.description,
+    invite_code: groupData.invite_code,
+    created_by: groupData.created_by,
+    max_members: groupData.max_members,
+    is_active: groupData.is_active,
+    created_at: groupData.created_at,
+    updated_at: groupData.updated_at,
+    userRole: membership.role,
+  };
 }
 
 async function getGroupMembers(groupId: string) {
