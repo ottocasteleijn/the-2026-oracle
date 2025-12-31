@@ -1,53 +1,5 @@
-import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { PredictionInput } from "@/components/prediction-input";
-import { PredictionCard, PredictionCardSkeleton } from "@/components/prediction-card";
-import { LeaderboardCompact } from "@/components/leaderboard-table";
-import type { PredictionWithDetails, LeaderboardEntry } from "@/types/database";
-import { Eye, Sparkles, Users, TrendingUp } from "lucide-react";
-
-async function getPredictions(): Promise<PredictionWithDetails[]> {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from("prediction_with_votes")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  if (error) {
-    console.error("Error fetching predictions:", error);
-    return [];
-  }
-
-  return data as PredictionWithDetails[];
-}
-
-async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-  const supabase = await createClient();
-  
-  // Use direct table query instead of RPC for proper type inference
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, display_name, avatar_url, total_potential_winnings, predictions_count, correct_predictions")
-    .order("total_potential_winnings", { ascending: false })
-    .limit(10);
-
-  if (error) {
-    console.error("Error fetching leaderboard:", error);
-    return [];
-  }
-
-  return (data ?? []).map((profile, index) => ({
-    user_id: profile.id,
-    display_name: profile.display_name,
-    avatar_url: profile.avatar_url,
-    total_potential_winnings: profile.total_potential_winnings ?? 0,
-    predictions_count: profile.predictions_count ?? 0,
-    correct_predictions: profile.correct_predictions ?? 0,
-    rank: index + 1,
-  }));
-}
+import { Eye, Sparkles } from "lucide-react";
 
 async function getCurrentUser() {
   const supabase = await createClient();
@@ -55,52 +7,8 @@ async function getCurrentUser() {
   return user;
 }
 
-function PredictionsFeed({ predictions }: { predictions: PredictionWithDetails[] }) {
-  if (predictions.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="h-16 w-16 rounded-2xl bg-glass-purple flex items-center justify-center mb-4">
-          <Eye className="h-8 w-8 text-oracle-purple" />
-        </div>
-        <h3 className="font-display text-xl font-bold text-text-primary mb-2">
-          No Predictions Yet
-        </h3>
-        <p className="text-text-muted max-w-md">
-          Be the first oracle! Make a bold prediction about what will happen in 2026.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="masonry-grid">
-      {predictions.map((prediction, index) => (
-        <PredictionCard
-          key={prediction.id}
-          prediction={prediction}
-          index={index}
-        />
-      ))}
-    </div>
-  );
-}
-
-function PredictionsFeedSkeleton() {
-  return (
-    <div className="masonry-grid">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <PredictionCardSkeleton key={i} />
-      ))}
-    </div>
-  );
-}
-
 export default async function DashboardPage() {
-  const [predictions, leaderboard, user] = await Promise.all([
-    getPredictions(),
-    getLeaderboard(),
-    getCurrentUser(),
-  ]);
+  const user = await getCurrentUser();
 
   return (
     <div className="min-h-screen">
@@ -124,88 +32,47 @@ export default async function DashboardPage() {
             Make bold predictions about 2026. The AI Judge scores your prophecy.
             The bolder and more specific, the higher your potential payout.
           </p>
-
-          {/* Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2 text-text-muted">
-              <Users className="h-4 w-4 text-oracle-cyan" />
-              <span>{leaderboard.length} Prophets</span>
-            </div>
-            <div className="flex items-center gap-2 text-text-muted">
-              <Eye className="h-4 w-4 text-oracle-purple" />
-              <span>{predictions.length} Predictions</span>
-            </div>
-            <div className="flex items-center gap-2 text-text-muted">
-              <TrendingUp className="h-4 w-4 text-oracle-emerald" />
-              <span>
-                ${leaderboard.reduce((sum, e) => sum + e.total_potential_winnings, 0).toLocaleString()} at stake
-              </span>
-            </div>
-          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column - Prediction Input & Feed */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Prediction Input */}
-            {user && (
-              <PredictionInput
-                onSubmit={async (prediction) => {
-                  "use server";
-                  // TODO: Save prediction to database
-                  console.log("Prediction submitted:", prediction);
-                }}
-              />
-            )}
-
-            {!user && (
-              <div className="glass-purple rounded-2xl p-8 text-center">
-                <Eye className="h-12 w-12 text-oracle-purple mx-auto mb-4" />
-                <h2 className="font-display text-xl font-bold text-text-primary mb-2">
-                  Join the Oracle
-                </h2>
-                <p className="text-text-secondary mb-6">
-                  Sign in to make your predictions and compete with friends.
-                </p>
-                <a
-                  href="/login"
-                  className="btn-oracle btn-oracle-primary inline-flex"
-                >
-                  Sign In to Predict
-                </a>
-              </div>
-            )}
-
-            {/* Predictions Feed */}
-            <div>
-              <div className="flex items-center gap-2 mb-6">
-                <h2 className="font-display text-xl font-bold text-text-primary">
-                  Recent Prophecies
-                </h2>
-                <div className="flex-1 h-px bg-gradient-to-r from-glass-border to-transparent" />
-              </div>
-
-              <Suspense fallback={<PredictionsFeedSkeleton />}>
-                <PredictionsFeed predictions={predictions} />
-              </Suspense>
-            </div>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {!user && (
+          <div className="glass-purple rounded-2xl p-8 text-center">
+            <Eye className="h-12 w-12 text-oracle-purple mx-auto mb-4" />
+            <h2 className="font-display text-xl font-bold text-text-primary mb-2">
+              Join the Oracle
+            </h2>
+            <p className="text-text-secondary mb-6">
+              Sign in to make your predictions and compete with friends.
+            </p>
+            <a
+              href="/login"
+              className="btn-oracle btn-oracle-primary inline-flex"
+            >
+              Sign In to Predict
+            </a>
           </div>
+        )}
 
-          {/* Sidebar - Leaderboard */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <LeaderboardCompact
-                entries={leaderboard}
-                currentUserId={user?.id}
-              />
-            </div>
+        {user && (
+          <div className="glass rounded-2xl p-8 text-center">
+            <Eye className="h-12 w-12 text-oracle-purple mx-auto mb-4" />
+            <h2 className="font-display text-xl font-bold text-text-primary mb-2">
+              Welcome, Oracle
+            </h2>
+            <p className="text-text-secondary mb-6">
+              You&apos;re signed in as {user.email}. Start making predictions!
+            </p>
+            <a
+              href="/groups"
+              className="btn-oracle btn-oracle-primary inline-flex"
+            >
+              View Your Circles
+            </a>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
 }
-

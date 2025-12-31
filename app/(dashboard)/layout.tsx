@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Eye, Users, Trophy, LogOut } from "lucide-react";
+import { Eye, Users, LogOut } from "lucide-react";
 import type { ProfileQueryResult } from "@/types/supabase-queries";
 
 async function UserNav() {
@@ -86,19 +86,13 @@ export default function DashboardLayout({
               <Link href="/">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <Eye className="h-4 w-4" />
-                  Feed
+                  Home
                 </Button>
               </Link>
               <Link href="/groups">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <Users className="h-4 w-4" />
                   Groups
-                </Button>
-              </Link>
-              <Link href="/leaderboard">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Trophy className="h-4 w-4" />
-                  Leaderboard
                 </Button>
               </Link>
             </div>
