@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Users, Plus } from "lucide-react";
+import { Users } from "lucide-react";
 
 export default async function GroupsPage() {
   const supabase = await createClient();
@@ -35,24 +35,16 @@ export default async function GroupsPage() {
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-text-primary mb-2">
-              Your Circles
-            </h1>
-            <p className="text-text-secondary">
-              Private groups where you share predictions with friends
-            </p>
-          </div>
-          <Link href="/groups/new">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create Circle
-            </Button>
-          </Link>
+        <div className="mb-8">
+          <h1 className="font-display text-3xl font-bold text-text-primary mb-2">
+            Your Circles
+          </h1>
+          <p className="text-text-secondary">
+            Private groups where you share predictions with friends
+          </p>
         </div>
 
-        {/* Empty State */}
+        {/* Coming Soon */}
         <Card className="p-12 text-center">
           <div className="h-16 w-16 rounded-2xl bg-glass-purple flex items-center justify-center mx-auto mb-6">
             <Users className="h-8 w-8 text-oracle-purple" />
