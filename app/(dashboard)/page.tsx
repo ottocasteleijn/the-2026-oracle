@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Eye, Sparkles } from "lucide-react";
 
@@ -46,12 +47,12 @@ export default async function DashboardPage() {
             <p className="text-text-secondary mb-6">
               Sign in to make your predictions and compete with friends.
             </p>
-            <a
+            <Link
               href="/login"
               className="btn-oracle btn-oracle-primary inline-flex"
             >
               Sign In to Predict
-            </a>
+            </Link>
           </div>
         )}
 
@@ -64,12 +65,12 @@ export default async function DashboardPage() {
             <p className="text-text-secondary mb-6">
               You&apos;re signed in as {user.email}. Start making predictions!
             </p>
-            <a
+            <Link
               href="/groups"
               className="btn-oracle btn-oracle-primary inline-flex"
             >
               View Your Circles
-            </a>
+            </Link>
           </div>
         )}
       </main>
